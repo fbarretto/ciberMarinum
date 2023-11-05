@@ -77,6 +77,7 @@ function preload() {
 }
 
 
+
 function setup() { 
   pixelDensity(1);
   
@@ -157,7 +158,7 @@ function setup() {
   // crreate Shader
   shader_grayscott = new Shader(gl, {fs:fs_grayscott});
   shader_display   = new Shader(gl, {fs:fs_display  });
-  
+  randomizeColors();
  
   // place initial samples
   initRD();
@@ -230,6 +231,8 @@ function draw(){
   updateRD();
   pop();
 
+  
+
   var w = tex.dst.w / SCREEN_SCALE;
   var h = tex.dst.h / SCREEN_SCALE;
   
@@ -242,7 +245,9 @@ function draw(){
   shader_display.uniformF('wh_rcp', [1.0/w, 1.0/h]);
   shader_display.quad();
   shader_display.end();
-
+  
+  if(frameCount % 60 == 0)
+  console.log(frameRate());
 }
 
 
@@ -312,13 +317,27 @@ function updateRD(){
     
     
     if (segmentation) {
-      image(segmentation.personMask, 0, 0, width, height);
+      // noStroke();
+      // fill(0,255,0);
+      ellipse(0,0,1,1);
+      tint(0,255,0);
+      image(segmentation.backgroundMask, 0, 0, width, height);
     }
     
     tex.swap();
   }
   
   fbo.end();
+
+  // for (let i=0; i<pallette.length-3; i++) {
+  //   pallette[i] += 0.0001;
+  //   pallette[i] %= 1;
+  // }
+ 
+  // for (let i=18; i<20; i++) {
+  //   pallette[i] = 0
+  //   }
+
 }
 
 function gotResults(error, result) {
