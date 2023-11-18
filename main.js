@@ -19,7 +19,8 @@
  
 'use strict';
 
-let debug = false;
+const DEBUG = false;
+let FULLSCREEN = false;
 
 // framebuffer
 let fbo;
@@ -115,7 +116,7 @@ function setup() {
   // webgl version (1=webgl1, 2=webgl2)
   let VERSION = gl.getVersion();
   
-  if (debug)
+  if (DEBUG)
     console.log("WebGL Version: "+VERSION);
   
 
@@ -168,6 +169,7 @@ function setup() {
   initRD();
   // noLoop();
   getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
+  fullscreen(FULLSCREEN);
 }
 
 function draw(){
@@ -192,23 +194,23 @@ function draw(){
   shader_display.quad();
   shader_display.end();
   
-  if(frameCount%60==0 && debug)
+  if(frameCount%60==0 && DEBUG)
     console.log(frameRate());
 }
 
 
 function initColors() {
-  if (debug)
+  if (DEBUG)
     console.log(pallette);
-  
+
   for(let i = 0; i < pallette.length; i+=3){
     HSBcolors[i/3] = hue(color(pallette[i], pallette[i+1], pallette[i+2]));
-    if (debug) {
+    if (DEBUG) {
       console.log("pos: " + i/3);
       console.log("hue: " + hue(color(pallette[i], pallette[i+1], pallette[i+2])));
     }
   }
-  if (debug)
+  if (DEBUG)
     console.log(HSBcolors);
 }
 
@@ -216,7 +218,7 @@ function initHSBColors() {
   for (let i=0; i<HSBcolors.length; i++) {
     HSBcolors[i] = random(360);
   }
-  if (debug)
+  if (DEBUG)
     console.log(HSBcolors);
 }
 
@@ -271,7 +273,10 @@ function keyReleased(){
   if(key === 'C'){
     randomizeColors();
   } else if (key === 'D') { 
-    debug = !debug;
+    DEBUG = !DEBUG;
+  } else if (key === 'F') {
+    FULLSCREEN = !FULLSCREEN;
+    fullscreen(FULLSCREEN);
   }
 }
 
