@@ -6,6 +6,10 @@ socket.addEventListener('open', function (event) {
 });
 
 socket.addEventListener('message', function (event) {
+  /**
+   * Represents the data obtained from the event.
+   * @type {string[]}
+   */
   let data = event.data.split(",");
 
   // imprime variáveis

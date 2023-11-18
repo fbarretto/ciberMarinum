@@ -16,10 +16,27 @@
  * https://github.com/diwi/PixelFlow/tree/master/examples/Miscellaneous/ReactionDiffusion
  */
  
- 
+/**
+ * This file contains the main JavaScript code for a reaction-diffusion simulation using WebGL2.
+ * It includes a lightweight WebGL wrapper and implements the reaction-diffusion algorithm.
+ * The simulation is based on the PixelFlow-Library and is used to create various visual effects.
+ * The code sets up the necessary variables, shaders, and parameters for the simulation.
+ * It also includes functions for loading shaders, initializing the simulation, and handling user input.
+ * Additionally, it preloads necessary assets and dependencies.
+ */
+
+// This code initializes a reaction-diffusion simulation using WebGL2.
+// It sets up the necessary variables, shaders, and parameters for the simulation.
+// The simulation is based on the PixelFlow-Library and is used to create visual effects.
+// The code includes functions for loading shaders, initializing the simulation, and handling user input.
+// It also preloads necessary assets and dependencies.
+
+
+
+
 'use strict';
 
-const DEBUG = true;
+const DEBUG = false;
 
 // framebuffer
 let fbo;
@@ -51,14 +68,25 @@ let SCREEN_SCALE = 0.5;
 //db = 0.4 - 0.6
 //iter = 2 - 10
 
-// reaction diffusion parameters
+/**
+ * Reaction-diffusion definition object.
+ * @typedef {Object} RdDef
+ * @property {number} da - Diffusion rate of chemical A.
+ * @property {number} db - Diffusion rate of chemical B.
+ * @property {number} feed - Feed rate of chemical A.
+ * @property {number} kill - Kill rate of chemical B.
+ * @property {number} dt - Time step.
+ * @property {number} iter - Number of iterations.
+ */
+
+/** @type {RdDef} */
 let rdDef = {
-  da      : 1.0,
-  db      : 0.6,
-  feed    : 0.015,
-  kill    : 0.05,
-  dt      : 1.0,
-  iter    : 20,
+  da: 1.0,
+  db: 0.6,
+  feed: 0.015,
+  kill: 0.05,
+  dt: 1.0,
+  iter: 20,
 };
 
 let minFeed = 0.012;
@@ -382,6 +410,9 @@ function updateRD(){
   fbo.end();
 }
 
+/**
+ * Updates the parameters for the reaction-diffusion simulation based on the sensor values.
+ */
 function updateSensorParams() {
   rdDef.feed = map(sensors[0], 0, 1, minFeed, maxFeed);
   rdDef.kill = map(sensors[1], 0, 1, minKill, maxKill);

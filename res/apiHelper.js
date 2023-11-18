@@ -176,9 +176,12 @@ function parseXml(xml) {
     var json = X.toJson(X.toObj(X.removeWhite(xml)), xml.nodeName, "\t");
     return "{\n" + tab + (tab ? json.replace(/\t/g, tab) : json.replace(/\t|\n/g, "")) + "\n}";
  }
- 
-//  const testdataurl = 'https://api.data.abs.gov.au/data/ABS,RES_DWELL/3.3GBRI.Q';
      
+/**
+ * Fetches data from the specified API URL and returns it as a JSON object.
+ * @param {string} apiURL - The URL of the API to fetch data from.
+ * @returns {Promise<Object>} - A promise that resolves to the fetched JSON data.
+ */
  async function getData(apiURL) {
    const response = await fetch(apiURL);
    data = await response.text();
