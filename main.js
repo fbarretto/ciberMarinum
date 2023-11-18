@@ -19,7 +19,7 @@
  
 'use strict';
 
-let debug = false;
+let debug = true;
 
 // framebuffer
 let fbo;
@@ -100,7 +100,7 @@ function preload() {
 
 function setup() { 
   pixelDensity(1);
-  
+
   // webgl canvas
   createCanvas(windowWidth, windowHeight, WEBGL);
   frameRate(30);
@@ -236,6 +236,8 @@ function randomizeColors(){
 function keyReleased(){
   if(key === 'C'){
     randomizeColors();
+  } else if (key === 'D') { 
+    debug = !debug;
   }
 }
 
@@ -249,12 +251,9 @@ function draw(){
   updatePallette();
   pop();
 
-  
-
   let w = tex.dst.w / SCREEN_SCALE;
   let h = tex.dst.h / SCREEN_SCALE;
   
-
   // display result
   shader_display.viewport(0, 0, w, h);
   shader_display.begin();
@@ -264,11 +263,9 @@ function draw(){
   shader_display.quad();
   shader_display.end();
   
-  if(frameCount % 60 == 0 && debug)
+  if(frameCount%60==0 && debug)
     console.log(frameRate());
 }
-
-
 
 function initRD(){
   ortho();
