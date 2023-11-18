@@ -19,8 +19,7 @@
  
 'use strict';
 
-const DEBUG = false;
-let FULLSCREEN = false;
+const DEBUG = true;
 
 // framebuffer
 let fbo;
@@ -93,7 +92,7 @@ let segmentation;
 
 const options = {
   outputStride: 8, // 8, 16, or 32, default is 16
-  segmentationThreshold: 0.3, // 0 - 1, defaults to 0.5
+  segmentationThreshold: 0.5, // 0 - 1, defaults to 0.5
 };
 
 function preload() {
@@ -170,7 +169,6 @@ function setup() {
   initColors();
   updatePallette();
   initRD();
-  fullscreen(FULLSCREEN);
 }
 
 function draw(){
@@ -276,9 +274,19 @@ function keyReleased(){
   } else if (key === 'D') { 
     DEBUG = !DEBUG;
   } else if (key === 'F') {
-    FULLSCREEN = !FULLSCREEN;
-    fullscreen(FULLSCREEN);
+    toggleFullscreen();
+  } else if (key === 'R') {
+    initRD();
   }
+}
+
+function mousePressed() {
+ toggleFullscreen();
+}
+
+function toggleFullscreen() {
+  let fs = fullscreen();
+  fullscreen(!fs);
 }
 
 function printManual() {
@@ -286,6 +294,7 @@ function printManual() {
   console.log("C: Randomize colors");
   console.log("D: Toggle debug");
   console.log("F: Toggle fullscreen");
+  console.log("R: Reset");
 }
 
 
@@ -310,6 +319,7 @@ function initRD(){
   //initial RD 
   
   stroke(0,255,0);
+  strokeWeight(10);
   noFill();
   rect(-width*0.47, -height*0.47, width*.95, height*0.95);
   noStroke();
