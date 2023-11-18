@@ -19,7 +19,7 @@
  
 'use strict';
 
-let debug = true;
+let debug = false;
 
 // framebuffer
 let fbo;
@@ -115,7 +115,8 @@ function setup() {
   // webgl version (1=webgl1, 2=webgl2)
   let VERSION = gl.getVersion();
   
-  console.log("WebGL Version: "+VERSION);
+  if (debug)
+    console.log("WebGL Version: "+VERSION);
   
 
   // get some webgl extensions
@@ -197,20 +198,26 @@ function draw(){
 
 
 function initColors() {
-  console.log(pallette);
+  if (debug)
+    console.log(pallette);
+  
   for(let i = 0; i < pallette.length; i+=3){
     HSBcolors[i/3] = hue(color(pallette[i], pallette[i+1], pallette[i+2]));
-    console.log("pos: " + i/3);
-    console.log("hue: " + hue(color(pallette[i], pallette[i+1], pallette[i+2])));
+    if (debug) {
+      console.log("pos: " + i/3);
+      console.log("hue: " + hue(color(pallette[i], pallette[i+1], pallette[i+2])));
+    }
   }
-  console.log(HSBcolors);
+  if (debug)
+    console.log(HSBcolors);
 }
 
 function initHSBColors() {
   for (let i=0; i<HSBcolors.length; i++) {
     HSBcolors[i] = random(360);
   }
-  console.log(HSBcolors);
+  if (debug)
+    console.log(HSBcolors);
 }
 
 function updatePallette() {
