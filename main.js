@@ -43,7 +43,14 @@ var shader_display;
 // offscreen resolution scale factor.
 var SCREEN_SCALE = 0.5; 
 
-// reaction diffusion settings and presets
+
+//feed range = 0.012 - 0.25
+//kill range = 0.045 - 0.055
+//da = 1
+//db = 0.4 - 0.6
+//iter = 2 - 10
+
+// reaction diffusion parameters
 var rdDef = {
   da      : 1.0,
   db      : 0.6,
@@ -62,11 +69,19 @@ let maxDb = 0.6;
 let minIter = 2;
 let maxIter = 10;
 
-//feed range = 0.012 - 0.25
-//kill range = 0.045 - 0.055
-//da = 1
-//db = 0.4 - 0.6
-//iter = 2 - 10
+
+// shading colors
+var pallette = [
+  1.00, 1.00, 1.00,
+  0.00, 0.40, 0.80,
+  0.20, 0.00, 0.20,
+  1.00, 0.80, 0.40,
+  0.50, 0.25, 0.12,     
+  0.50, 0.50, 0.50,
+  0.00, 0.00, 0.00
+];
+
+let HSBcolors = Array(pallette.length).fill(0);
 
 let bodypix;
 let video;
@@ -166,21 +181,6 @@ function windowResized() {
   initRD();
 }
 
-
-
-// shading colors
-var pallette = [
-  1.00, 1.00, 1.00,
-  0.00, 0.40, 0.80,
-  0.20, 0.00, 0.20,
-  1.00, 0.80, 0.40,
-  0.50, 0.25, 0.12,     
-  0.50, 0.50, 0.50,
-  0.00, 0.00, 0.00
-];
-
-
-
 function randomizeColors(){
   var num = pallette.length /3;
   for(var i = 1; i < num-1; i++){
@@ -194,7 +194,6 @@ function randomizeColors(){
     pallette[id + 2] = b;
   }
 }
-
 
 function keyReleased(){
   if(key === 'C'){
@@ -227,7 +226,7 @@ function draw(){
   shader_display.end();
   
   if(frameCount % 60 == 0)
-  console.log(frameRate());
+    console.log(frameRate());
 }
 
 
