@@ -96,6 +96,8 @@ const options = {
 
 function preload() {
   bodypix = ml5.bodyPix(options);
+  getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
+  printManual();
 }
 
 
@@ -116,10 +118,11 @@ function setup() {
   // webgl version (1=webgl1, 2=webgl2)
   let VERSION = gl.getVersion();
   
-  if (DEBUG)
+  noCursor();
+  if (DEBUG) {
     console.log("WebGL Version: "+VERSION);
+  }
   
-
   // get some webgl extensions
   // if(VERSION === 1){
     // let ext = gl.newExt(['OES_texture_float', 'OES_texture_float_linear'], true);
@@ -160,15 +163,11 @@ function setup() {
   // crreate Shader
   shader_grayscott = new Shader(gl, {fs:fs_grayscott});
   shader_display   = new Shader(gl, {fs:fs_display  });
-  // randomizeColors();
-  
+    
   // place initial samples
   initColors();
   updatePallette();
-  // initHSBColors()
   initRD();
-  // noLoop();
-  getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
   fullscreen(FULLSCREEN);
 }
 
@@ -214,7 +213,7 @@ function initColors() {
     console.log(HSBcolors);
 }
 
-function initHSBColors() {
+function randomizeHSBColors() {
   for (let i=0; i<HSBcolors.length; i++) {
     HSBcolors[i] = random(360);
   }
@@ -278,6 +277,13 @@ function keyReleased(){
     FULLSCREEN = !FULLSCREEN;
     fullscreen(FULLSCREEN);
   }
+}
+
+function printManual() {
+  console.log("Manual:");
+  console.log("C: Randomize colors");
+  console.log("D: Toggle debug");
+  console.log("F: Toggle fullscreen");
 }
 
 
