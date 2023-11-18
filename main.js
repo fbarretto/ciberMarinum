@@ -19,29 +19,30 @@
  
 'use strict';
 
+let debug = false;
 
 // framebuffer
-var fbo;
+let fbo;
 
 // tex-struct (ping-pong)
-var tex = 
+let tex = 
 {
   src : null,
   dst : null,
   swap : function(){
-    var tmp = this.src;
+    let tmp = this.src;
     this.src = this.dst;
     this.dst = tmp;
   }
 };
 
 // shader
-var shaderfiles = {};
-var shader_grayscott;
-var shader_display;
+let shaderfiles = {};
+let shader_grayscott;
+let shader_display;
 
 // offscreen resolution scale factor.
-var SCREEN_SCALE = 0.5; 
+let SCREEN_SCALE = 0.5; 
 
 
 //feed range = 0.012 - 0.25
@@ -51,17 +52,17 @@ var SCREEN_SCALE = 0.5;
 //iter = 2 - 10
 
 // reaction diffusion parameters
-var rdDef = {
+let rdDef = {
   da      : 1.0,
   db      : 0.6,
-  feed    : 0.04,
-  kill    : 0.06,
+  feed    : 0.015,
+  kill    : 0.05,
   dt      : 1.0,
-  iter    : 10,
+  iter    : 20,
 };
 
 let minFeed = 0.012;
-let maxFeed = 0.25;
+let maxFeed = 0.025;
 let minKill = 0.045;
 let maxKill = 0.055;
 let minDb = 0.4;
@@ -71,7 +72,7 @@ let maxIter = 10;
 
 
 // shading colors
-var pallette = [
+let pallette = [
   1.00, 1.00, 1.00,
   0.00, 0.40, 0.80,
   0.20, 0.00, 0.20,
@@ -81,7 +82,7 @@ var pallette = [
   0.00, 0.00, 0.00
 ];
 
-let HSBcolors = Array(pallette.length).fill(0);
+let HSBcolors = Array(pallette.length/3).fill(0);
 
 let bodypix;
 let video;
@@ -97,7 +98,6 @@ function preload() {
 }
 
 
-
 function setup() { 
   pixelDensity(1);
   
@@ -108,20 +108,20 @@ function setup() {
   video.hide();
    
   // webgl context
-  var gl = this._renderer.GL;
+  let gl = this._renderer.GL;
   
   // webgl version (1=webgl1, 2=webgl2)
-  var VERSION = gl.getVersion();
+  let VERSION = gl.getVersion();
   
   console.log("WebGL Version: "+VERSION);
   
 
   // get some webgl extensions
   // if(VERSION === 1){
-    // var ext = gl.newExt(['OES_texture_float', 'OES_texture_float_linear'], true);
+    // let ext = gl.newExt(['OES_texture_float', 'OES_texture_float_linear'], true);
   // }
   // if(VERSION === 2){
-    // var ext = gl.newExt(['EXT_color_buffer_float'], true);
+    // let ext = gl.newExt(['EXT_color_buffer_float'], true);
   // }
   
   // beeing lazy ... load all available extensions.
@@ -132,7 +132,7 @@ function setup() {
   fbo = gl.newFramebuffer();
 
   // create Textures for multipass rendering
-  var def = {
+  let def = {
      target   : gl.TEXTURE_2D
     ,iformat  : gl.RGBA32F
     ,format   : gl.RGBA
@@ -141,25 +141,60 @@ function setup() {
     ,filter   : [gl.NEAREST, gl.LINEAR]
   }
 
-  var tex_w = ceil(width * SCREEN_SCALE);
-  var tex_h = ceil(height * SCREEN_SCALE);
+  let tex_w = ceil(width * SCREEN_SCALE);
+  let tex_h = ceil(height * SCREEN_SCALE);
 
   tex.src = gl.newTexture(tex_w, tex_h, def);
   tex.dst = gl.newTexture(tex_w, tex_h, def);
 
   // Shader source, depending on available webgl version
-  // var fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
-  // var fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
+  // let fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
+  // let fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
 	
-  var fs_grayscott = shaderfiles["webgl"+VERSION+".fs_grayscott"];
-  var fs_display   = shaderfiles["webgl"+VERSION+".fs_display"];
+  let fs_grayscott = shaderfiles["webgl"+VERSION+".fs_grayscott"];
+  let fs_display   = shaderfiles["webgl"+VERSION+".fs_display"];
   // crreate Shader
   shader_grayscott = new Shader(gl, {fs:fs_grayscott});
   shader_display   = new Shader(gl, {fs:fs_display  });
-  randomizeColors();
+  // randomizeColors();
  
   // place initial samples
+  initColors();
+  updatePallette();
+  // initHSBColors()
   initRD();
+  noLoop();
+}
+
+function initColors() {
+  console.log(pallette);
+  for(let i = 0; i < pallette.length; i+=3){
+    HSBcolors[i/3] = hue(color(pallette[i], pallette[i+1], pallette[i+2]));
+    console.log("pos: " + i/3);
+    console.log("hue: " + hue(color(pallette[i], pallette[i+1], pallette[i+2])));
+  }
+  console.log(HSBcolors);
+}
+
+function initHSBColors() {
+  for (let i=0; i<HSBcolors.length; i++) {
+    HSBcolors[i] = random(360);
+  }
+  console.log(HSBcolors);
+}
+
+function updatePallette() {
+  for (let i=0; i<HSBcolors.length; i++) {
+    HSBcolors[i] = (HSBcolors[i] + 1) % 360;
+  }
+
+  for(let i = 0; i < pallette.length; i+=3){
+    let c = color(`hsb(${HSBcolors[i/3]}, 100%, 100%)`);
+    pallette[i] = red(c)/255.0;
+    pallette[i+1] = green(c)/255.0;
+    pallette[i+2] = blue(c)/255.0;
+  }
+  // console.log(pallette);
 }
 
 function videoReady() {
@@ -168,12 +203,12 @@ function videoReady() {
 
 function windowResized() {
 	if(!fbo) return;
-  var w = windowWidth;
-  var h = windowHeight;
+  let w = windowWidth;
+  let h = windowHeight;
   resizeCanvas(w, h);
   
-  var tex_w = ceil(w * SCREEN_SCALE);
-  var tex_h = ceil(h * SCREEN_SCALE);
+  let tex_w = ceil(w * SCREEN_SCALE);
+  let tex_h = ceil(h * SCREEN_SCALE);
   
   tex.src.resize(tex_w, tex_h);
   tex.dst.resize(tex_w, tex_h);
@@ -182,12 +217,12 @@ function windowResized() {
 }
 
 function randomizeColors(){
-  var num = pallette.length /3;
-  for(var i = 1; i < num-1; i++){
-    var id = i * 3;
-    var r = random(1);
-    var g = random(1);
-    var b = random(1);
+  let num = pallette.length /3;
+  for(let i = 1; i < num-1; i++){
+    let id = i * 3;
+    let r = random(1);
+    let g = random(1);
+    let b = random(1);
     
     pallette[id + 0] = r;
     pallette[id + 1] = g;
@@ -208,12 +243,13 @@ function draw(){
   ortho();
   translate(-width/2, -height/2, 0);
   updateRD();
+  updatePallette();
   pop();
 
   
 
-  var w = tex.dst.w / SCREEN_SCALE;
-  var h = tex.dst.h / SCREEN_SCALE;
+  let w = tex.dst.w / SCREEN_SCALE;
+  let h = tex.dst.h / SCREEN_SCALE;
   
 
   // display result
@@ -225,7 +261,7 @@ function draw(){
   shader_display.quad();
   shader_display.end();
   
-  if(frameCount % 60 == 0)
+  if(frameCount % 60 == 0 && debug)
     console.log(frameRate());
 }
 
@@ -235,13 +271,13 @@ function initRD(){
   ortho();
   // translate(-width/2, -height/2, 0);
     
-  var gl = fbo.gl;
+  let gl = fbo.gl;
   
   // bind framebuffer and texture for offscreenrendering
   fbo.begin(tex.dst);
   
-  var w = tex.dst.w;
-  var h = tex.dst.h;
+  let w = tex.dst.w;
+  let h = tex.dst.h;
   
   gl.viewport(0, 0, w, h);
   gl.clearColor(1.0, 0.0, 0.0, 0.0);
@@ -264,16 +300,16 @@ function initRD(){
 
 function updateRD(){
 
-  var gl = fbo.gl;
+  let gl = fbo.gl;
 
   // multipass rendering (ping-pong)
-  for(var i = 0; i < rdDef.iter; i++){
+  for(let i = 0; i < rdDef.iter; i++){
     
     // set texture as rendertarget
     fbo.begin(tex.dst);
     
-    var w = tex.dst.w;
-    var h = tex.dst.h;
+    let w = tex.dst.w;
+    let h = tex.dst.h;
  
     // clear texture
     gl.viewport(0, 0, w, h);
