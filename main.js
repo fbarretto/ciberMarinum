@@ -12,7 +12,7 @@
 
  
 /**
- * This Reaction-Diffusion Demo is a port from the PixelFlow-Library.
+ * This is a port from the PixelFlow-Library.
  * https://github.com/diwi/PixelFlow/tree/master/examples/Miscellaneous/ReactionDiffusion
  */
  
@@ -41,27 +41,32 @@ var shader_grayscott;
 var shader_display;
 
 // offscreen resolution scale factor.
-var SCREEN_SCALE = 1.0; 
+var SCREEN_SCALE = 0.5; 
 
 // reaction diffusion settings and presets
 var rdDef = {
-  name    : 'ReactionDiffusion',
   da      : 1.0,
   db      : 0.6,
   feed    : 0.04,
   kill    : 0.06,
   dt      : 1.0,
   iter    : 10,
-  reset   : initRD,
-  preset0 : function() {  this.feed = 0.040; this.kill = 0.060; this.da = 1.00; this.db = 0.60; },
-  preset1 : function() {  this.feed = 0.034; this.kill = 0.059; this.da = 1.00; this.db = 0.60; },
-  preset2 : function() {  this.feed = 0.080; this.kill = 0.060; this.da = 1.00; this.db = 0.40; },
-  preset3 : function() {  this.feed = 0.015; this.kill = 0.050; this.da = 1.00; this.db = 0.60; },
-  preset4 : function() {  this.feed = 0.072; this.kill = 0.062; this.da = 0.50; this.db = 0.25; },
-  preset5 : function() {  this.feed = 0.071; this.kill = 0.063; this.da = 0.40; this.db = 0.20; },
-  preset6 : function() {  this.feed = 0.023; this.kill = 0.052; this.da = 0.50; this.db = 0.50; },
-  preset7 : function() {  this.feed = 0.029; this.kill = 0.056; this.da = 0.60; this.db = 0.46; },
 };
+
+let minFeed = 0.012;
+let maxFeed = 0.25;
+let minKill = 0.045;
+let maxKill = 0.055;
+let minDb = 0.4;
+let maxDb = 0.6;
+let minIter = 2;
+let maxIter = 10;
+
+//feed range = 0.012 - 0.25
+//kill range = 0.045 - 0.055
+//da = 1
+//db = 0.4 - 0.6
+//iter = 2 - 10
 
 let bodypix;
 let video;
@@ -86,26 +91,7 @@ function setup() {
   video = createCapture(VIDEO, videoReady);
   video.size(width, height);
   video.hide();
-  // create gui (dat.gui)
-  var gui = new dat.GUI();
-  gui.add(rdDef, 'name');
-  gui.add(rdDef, 'da'   , 0, 1  ).listen();
-  gui.add(rdDef, 'db'   , 0, 1  ).listen();
-  gui.add(rdDef, 'feed' , 0.01, 0.09).listen();
-  gui.add(rdDef, 'kill' , 0.01, 0.09).listen();
-  gui.add(rdDef, 'dt'   , 0, 1);
-  gui.add(rdDef, 'iter' , 1, 50);
-  gui.add(rdDef, 'preset0');
-  gui.add(rdDef, 'preset1');
-  gui.add(rdDef, 'preset2');
-  gui.add(rdDef, 'preset3');
-  gui.add(rdDef, 'preset4');
-  gui.add(rdDef, 'preset5');
-  gui.add(rdDef, 'preset6');
-  gui.add(rdDef, 'preset7');
-  gui.add(rdDef, 'reset'  );
-  
-  
+   
   // webgl context
   var gl = this._renderer.GL;
   
@@ -140,15 +126,12 @@ function setup() {
     ,filter   : [gl.NEAREST, gl.LINEAR]
   }
 
-  
   var tex_w = ceil(width * SCREEN_SCALE);
   var tex_h = ceil(height * SCREEN_SCALE);
 
   tex.src = gl.newTexture(tex_w, tex_h, def);
   tex.dst = gl.newTexture(tex_w, tex_h, def);
 
-
-  
   // Shader source, depending on available webgl version
   // var fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
   // var fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
@@ -162,9 +145,6 @@ function setup() {
  
   // place initial samples
   initRD();
-
-  
- 
 }
 
 function videoReady() {
@@ -321,23 +301,17 @@ function updateRD(){
       // fill(0,255,0);
       ellipse(0,0,1,1);
       tint(0,255,0);
+      push();
+      translate(width,0); // move to far corner
+      scale(-1.0,1.0); // flip x-axis backwards
       image(segmentation.backgroundMask, 0, 0, width, height);
+      pop();
     }
     
     tex.swap();
   }
   
   fbo.end();
-
-  // for (let i=0; i<pallette.length-3; i++) {
-  //   pallette[i] += 0.0001;
-  //   pallette[i] %= 1;
-  // }
- 
-  // for (let i=18; i<20; i++) {
-  //   pallette[i] = 0
-  //   }
-
 }
 
 function gotResults(error, result) {
