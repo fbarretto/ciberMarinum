@@ -1,4 +1,5 @@
 # CiberMarinum
+by Suzete Venturelli, [Artur Cabral] (https://github.com/arturcabral) and Francisco Barretto
 
 This interactive installation is based on a Reaction Diffusion GLSL shader, running in WEBGL, that reacts to a live video stream that is processed by the bodyPix AI model. The parameters of the RD are controlled by the data provided by a set of sensors installed on an aquarium with live plants and by tide high, wind and ocean turbulence at the region where the work is being presented.
 
@@ -6,12 +7,12 @@ This interactive installation is based on a Reaction Diffusion GLSL shader, runn
 
 - [Installation](#installation)
 - [Usage](#usage)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Installation
 
 Clone the repository into your web container
+
 Access ciberMarinum folder home
 
 ## Usage
