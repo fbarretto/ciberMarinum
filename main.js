@@ -25,15 +25,6 @@
  * Additionally, it preloads necessary assets and dependencies.
  */
 
-// This code initializes a reaction-diffusion simulation using WebGL2.
-// It sets up the necessary variables, shaders, and parameters for the simulation.
-// The simulation is based on the PixelFlow-Library and is used to create visual effects.
-// The code includes functions for loading shaders, initializing the simulation, and handling user input.
-// It also preloads necessary assets and dependencies.
-
-
-
-
 'use strict';
 
 const DEBUG = false;
