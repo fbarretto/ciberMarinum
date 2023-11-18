@@ -83,6 +83,8 @@ let pallette = [
   0.00, 0.00, 0.00
 ];
 
+let sensors = [0.5, 0.5];
+
 let HSBcolors = Array(pallette.length/3).fill(0);
 
 let bodypix;
@@ -305,20 +307,21 @@ function initRD(){
   gl.disable(gl.BLEND);
   gl.disable(gl.DEPTH_TEST);
   
-  // < native p5 here
+  //initial RD 
+  
+  stroke(0,255,0);
+  noFill();
+  rect(-width*0.47, -height*0.47, width*.95, height*0.95);
   noStroke();
   fill(0,255,0);
-  ellipse(-100, 0, 100, 100);
-  ellipse(+100, 0, 100, 100);
-  ellipse(0, -100, 100, 100);
-  ellipse(0, +100, 100, 100);
-  // >
+
   tex.swap();
   fbo.end();
 
 }
 
 function updateRD(){
+  updateSensorParams();
 
   let gl = fbo.gl;
 
@@ -367,6 +370,13 @@ function updateRD(){
   }
   
   fbo.end();
+}
+
+function updateSensorParams() {
+  rdDef.feed = map(sensors[0], 0, 1, minFeed, maxFeed);
+  rdDef.kill = map(sensors[1], 0, 1, minKill, maxKill);
+  rdDef.db = map(sensors[0], 0, 1, minDb, maxDb);
+  rdDef.iter = map(sensors[1], 0, 1, minIter, maxIter);
 }
 
 function gotResults(error, result) {
