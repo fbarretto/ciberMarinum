@@ -145,10 +145,10 @@ function setup() {
 
   let tex_w = ceil(width * SCREEN_SCALE);
   let tex_h = ceil(height * SCREEN_SCALE);
-
+  
   tex.src = gl.newTexture(tex_w, tex_h, def);
   tex.dst = gl.newTexture(tex_w, tex_h, def);
-
+  
   // Shader source, depending on available webgl version
   // let fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
   // let fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
@@ -159,7 +159,7 @@ function setup() {
   shader_grayscott = new Shader(gl, {fs:fs_grayscott});
   shader_display   = new Shader(gl, {fs:fs_display  });
   // randomizeColors();
- 
+  
   // place initial samples
   initColors();
   updatePallette();
@@ -168,6 +168,33 @@ function setup() {
   // noLoop();
   getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
 }
+
+function draw(){
+  if(!fbo) return;
+  // ortho(0, width, -height, 0, 0, 20000);
+  push();
+  ortho();
+  translate(-width/2, -height/2, 0);
+  updateRD();
+  updatePallette();
+  pop();
+
+  let w = tex.dst.w / SCREEN_SCALE;
+  let h = tex.dst.h / SCREEN_SCALE;
+  
+  // display result
+  shader_display.viewport(0, 0, w, h);
+  shader_display.begin();
+  shader_display.uniformF('PALLETTE', pallette, 7); 
+  shader_display.uniformT('tex', tex.src);
+  shader_display.uniformF('wh_rcp', [1.0/w, 1.0/h]);
+  shader_display.quad();
+  shader_display.end();
+  
+  if(frameCount%60==0 && debug)
+    console.log(frameRate());
+}
+
 
 function initColors() {
   console.log(pallette);
@@ -241,31 +268,6 @@ function keyReleased(){
   }
 }
 
-function draw(){
-  if(!fbo) return;
-  // ortho(0, width, -height, 0, 0, 20000);
-  push();
-  ortho();
-  translate(-width/2, -height/2, 0);
-  updateRD();
-  updatePallette();
-  pop();
-
-  let w = tex.dst.w / SCREEN_SCALE;
-  let h = tex.dst.h / SCREEN_SCALE;
-  
-  // display result
-  shader_display.viewport(0, 0, w, h);
-  shader_display.begin();
-  shader_display.uniformF('PALLETTE', pallette, 7); 
-  shader_display.uniformT('tex', tex.src);
-  shader_display.uniformF('wh_rcp', [1.0/w, 1.0/h]);
-  shader_display.quad();
-  shader_display.end();
-  
-  if(frameCount%60==0 && debug)
-    console.log(frameRate());
-}
 
 function initRD(){
   ortho();
