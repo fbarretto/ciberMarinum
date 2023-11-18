@@ -37,6 +37,7 @@
 'use strict';
 
 const DEBUG = false;
+const API_URL = "http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml";
 
 // framebuffer
 let fbo;
@@ -125,7 +126,7 @@ const options = {
 
 function preload() {
   bodypix = ml5.bodyPix(options);
-  getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
+  getData(API_URL).then((data) => {console.log(data)});
   printManual();
 }
 
@@ -416,8 +417,6 @@ function updateRD(){
 function updateSensorParams() {
   rdDef.feed = map(sensors[0], 0, 1, minFeed, maxFeed);
   rdDef.kill = map(sensors[1], 0, 1, minKill, maxKill);
-  rdDef.db = map(sensors[0], 0, 1, minDb, maxDb);
-  rdDef.iter = map(sensors[1], 0, 1, minIter, maxIter);
 }
 
 function gotResults(error, result) {
