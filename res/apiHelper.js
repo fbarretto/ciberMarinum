@@ -187,6 +187,4 @@ function parseXml(xml) {
    const fixedJsonStr = myJsonStr.replace(/\nundefined/, "");
    const jsonObj = JSON.parse(fixedJsonStr);
    return jsonObj;
-   
  }
- console.log(getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml"));

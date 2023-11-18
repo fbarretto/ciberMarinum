@@ -103,6 +103,8 @@ function setup() {
   
   // webgl canvas
   createCanvas(windowWidth, windowHeight, WEBGL);
+  frameRate(30);
+
   video = createCapture(VIDEO, videoReady);
   video.size(width, height);
   video.hide();
@@ -163,7 +165,8 @@ function setup() {
   updatePallette();
   // initHSBColors()
   initRD();
-  noLoop();
+  // noLoop();
+  getData("http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml").then((data) => {console.log(data)});
 }
 
 function initColors() {
