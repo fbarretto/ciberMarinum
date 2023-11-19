@@ -87,8 +87,10 @@ let minKill = 0.045;
 let maxKill = 0.055;
 let minDb = 0.4;
 let maxDb = 0.6;
-let minIter = 2;
-let maxIter = 10;
+let minIter = 8;
+let maxIter = 15;
+let minDt = 0.9;
+let maxDt = 1.2;
 
 
 // shading colors
@@ -110,9 +112,12 @@ let bodypix;
 let video;
 let segmentation;
 
-let hour;
+
 let day;
+let hour;
+let min;
 let data;
+let index;
 
 const options = {
   outputStride: 8, // 8, 16, or 32, default is 16
@@ -193,7 +198,8 @@ function setup() {
   initColors();
   updatePallette();
   initRD();
-  updateTime();
+  index = 0;
+  initTime();
 }
 
 function draw(){
@@ -220,8 +226,8 @@ function draw(){
   
   if(frameCount%60==0) {
     updateTime();
-    if (DEBUG)
-      console.log(frameRate());
+    // if (DEBUG)
+      // console.log(frameRate());
   }
 }
 
@@ -413,6 +419,7 @@ function updateRD(){
 function updateParams() {
   updateSensorParams();
   updateAPIparams();
+  if (DEBUG) console.log(rdDef);
 }
 
 /**
@@ -433,26 +440,75 @@ function gotResults(error, result) {
 }
 
 function updateAPIparams() {
-//   [20:16, 11/18/2023] barretto: @property {number} db - Diffusion rate of chemical B.
-//  * @property {number} dt - Time step.
-//  * @property {number} iter - Number of iterations.
-// [20:17, 11/18/2023] barretto: pra
-// - altura
-// - vento
-// - agitação do mar
-  // rdDef.dt = data.previsao[0];
-  // console.log(data.previsao);
+  if (data) {
+    let index = int(hour/3);
+    let amt = ((hour-index*3)*60+min)/360;
+    let vento = lerp(data[index].vento, data[index+1].vento, amt);
+    let altura = lerp(data[index].altura, data[index+1].altura, amt);
+    let agitacao = lerp(data[index].agitacao, data[index+1].agitacao, amt);
+
+    rdDef.db = map(agitacao, 0, 1, minDb, maxDb);
+    rdDef.dt = map(altura, 0, 1, minDt, maxDt);
+    rdDef.iter = map(vento, 0, 1, minIter, maxIter);
+  } else {
+    loadData();
+  }
+  
 }
 
-function updateTime() {
+function initTime() {
   let date = new Date();
+  min = date.getMinutes();
   hour = date.getHours();
   day = date.getDate();
 }
 
+function updateTime() {
+  let date = new Date();
+  min = date.getMinutes();
+  hour = date.getHours();
+
+  if (date.getDate() != day) {
+    loadData();
+  }
+
+  index = int(hour/3);
+}
+
 function loadData() {
   getData(API_URL).then((apiData) => {
+    let date = new Date();
+    day = date.getDate();
+    
     data = apiData.cidade.previsao;
+    let maxVento = 0;
+    let maxAltura = 0;
+    let minAltura = 100;
+
+    for (let i=0; i<data.length; i++) {
+      if (data[i].vento > maxVento) {
+        maxVento = data[i].vento;
+      }
+      if (data[i].altura > maxAltura) {
+        maxAltura = data[i].altura;
+      }
+      if (data[i].altura < minAltura) {
+        minAltura = data[i].altura;
+      }
+    }
+
+    for (let i=0; i<data.length; i++) {
+      data[i].vento = map(data[i].vento, 0, maxVento, 0, 1);
+      data[i].altura = map(data[i].altura, minAltura, maxAltura, 0, 1);
+      if (data[i].agitacao == "Fraco") {
+        data[i].agitacao = 0;
+      } else if (data[i].agitacao == "Moderado") {      
+        data[i].agitacao = 0.5;
+      } else if (data[i].agitacao == "Forte") {
+        data[i].agitacao = 1;
+      }
+    }
+    
     if (DEBUG)
       console.log(data);
   });
