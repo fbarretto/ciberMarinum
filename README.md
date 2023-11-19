@@ -25,7 +25,7 @@ RD Parameters are defined at rDef variable as follows:
 /**
  * Reaction-diffusion definition object.
  * @typedef {Object} RdDef
- * @property {number} da - Diffusion rate of chemical A.
+ * @property {number} da - Diffusion rate of chemical A (fixed).
  * @property {number} db - Diffusion rate of chemical B.
  * @property {number} feed - Feed rate of chemical A.
  * @property {number} kill - Kill rate of chemical B.
