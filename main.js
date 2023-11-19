@@ -110,6 +110,10 @@ let bodypix;
 let video;
 let segmentation;
 
+let hour;
+let day;
+let data;
+
 const options = {
   outputStride: 8, // 8, 16, or 32, default is 16
   segmentationThreshold: 0.5, // 0 - 1, defaults to 0.5
@@ -117,7 +121,7 @@ const options = {
 
 function preload() {
   bodypix = ml5.bodyPix(options);
-  getData(API_URL).then((data) => {console.log(data)});
+  loadData();
   printManual();
 }
 
@@ -189,6 +193,7 @@ function setup() {
   initColors();
   updatePallette();
   initRD();
+  updateTime();
 }
 
 function draw(){
@@ -213,8 +218,11 @@ function draw(){
   shader_display.quad();
   shader_display.end();
   
-  if(frameCount%60==0 && DEBUG)
-    console.log(frameRate());
+  if(frameCount%60==0) {
+    updateTime();
+    if (DEBUG)
+      console.log(frameRate());
+  }
 }
 
 
@@ -351,7 +359,7 @@ function initRD(){
 }
 
 function updateRD(){
-  updateSensorParams();
+  updateParams();
 
   let gl = fbo.gl;
 
@@ -402,6 +410,11 @@ function updateRD(){
   fbo.end();
 }
 
+function updateParams() {
+  updateSensorParams();
+  updateAPIparams();
+}
+
 /**
  * Updates the parameters for the reaction-diffusion simulation based on the sensor values.
  */
@@ -417,4 +430,30 @@ function gotResults(error, result) {
   }
   segmentation = result;
   bodypix.segment(video, gotResults);
+}
+
+function updateAPIparams() {
+//   [20:16, 11/18/2023] barretto: @property {number} db - Diffusion rate of chemical B.
+//  * @property {number} dt - Time step.
+//  * @property {number} iter - Number of iterations.
+// [20:17, 11/18/2023] barretto: pra
+// - altura
+// - vento
+// - agitação do mar
+  // rdDef.dt = data.previsao[0];
+  // console.log(data.previsao);
+}
+
+function updateTime() {
+  let date = new Date();
+  hour = date.getHours();
+  day = date.getDate();
+}
+
+function loadData() {
+  getData(API_URL).then((apiData) => {
+    data = apiData.cidade.previsao;
+    if (DEBUG)
+      console.log(data);
+  });
 }
