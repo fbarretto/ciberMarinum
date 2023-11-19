@@ -34,5 +34,7 @@ RD Parameters are defined at rDef variable as follows:
  */
 ``````
 
+Set debug=true if you want to print the parameters at the JS console.
+
 ## License
 This project is licensed under the [MIT License](LICENSE).
