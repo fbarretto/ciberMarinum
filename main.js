@@ -1,4 +1,12 @@
 /**
+ * This file contains the main JavaScript code for a reaction-diffusion simulation using WebGL2.
+ * It includes a lightweight WebGL wrapper and implements the reaction-diffusion algorithm.
+ * The simulation is based on the PixelFlow-Library and is used to create various visual effects.
+ * The code sets up the necessary variables, shaders, and parameters for the simulation.
+ * It also includes functions for loading shaders, initializing the simulation, and handling user input.
+ * Additionally, it preloads necessary assets and dependencies.
+ */
+/**
  * dwgl.js - a very lightweight webgl wrapper.
  * 
  * Copyright 2018 by Thomas Diewald (https://www.thomasdiewald.com)
@@ -226,8 +234,8 @@ function draw(){
   
   if(frameCount%60==0) {
     updateTime();
-    // if (DEBUG)
-      // console.log(frameRate());
+    if (DEBUG)
+      console.log(frameRate());
   }
 }
 
@@ -266,7 +274,6 @@ function updatePallette() {
     pallette[i+1] = green(c)/255.0;
     pallette[i+2] = blue(c)/255.0;
   }
-  // console.log(pallette);
 }
 
 function videoReady() {
@@ -355,7 +362,7 @@ function initRD(){
   stroke(0,255,0);
   strokeWeight(10);
   noFill();
-  rect(-width*0.47, -height*0.47, width*.95, height*0.95);
+  rect(-width*0.475, -height*0.475, width*.95, height*0.95);
   noStroke();
   fill(0,255,0);
 
@@ -397,10 +404,7 @@ function updateRD(){
     shader_grayscott.quad();
     shader_grayscott.end();
     
-    
     if (segmentation) {
-      // noStroke();
-      // fill(0,255,0);
       ellipse(0,0,1,1);
       tint(0,255,0);
       push();
@@ -416,6 +420,16 @@ function updateRD(){
   fbo.end();
 }
 
+function gotResults(error, result) {
+  if (error) {
+    console.log(error);
+    return;
+  }
+  segmentation = result;
+  bodypix.segment(video, gotResults);
+}
+
+
 function updateParams() {
   updateSensorParams();
   updateAPIparams();
@@ -430,15 +444,12 @@ function updateSensorParams() {
   rdDef.kill = map(sensors[1], 0, 1, minKill, maxKill);
 }
 
-function gotResults(error, result) {
-  if (error) {
-    console.log(error);
-    return;
-  }
-  segmentation = result;
-  bodypix.segment(video, gotResults);
-}
-
+/**
+ * Updates the API parameters based on the current hour, minute, and data.
+ * If data is available, it calculates the interpolated values for vento, altura, and agitacao
+ * based on the current hour and minute. Then it maps these values to rdDef.db, rdDef.dt, and rdDef.iter
+ * respectively. If data is not available, it calls the loadData function.
+ */
 function updateAPIparams() {
   if (data) {
     let index = int(hour/3);
@@ -453,7 +464,6 @@ function updateAPIparams() {
   } else {
     loadData();
   }
-  
 }
 
 function initTime() {
@@ -475,40 +485,36 @@ function updateTime() {
   index = int(hour/3);
 }
 
+
+/**
+ * Loads data from an API, processes and normalize it.
+ */
 function loadData() {
   getData(API_URL).then((apiData) => {
     let date = new Date();
     day = date.getDate();
-    
-    data = apiData.cidade.previsao;
-    let maxVento = 0;
-    let maxAltura = 0;
-    let minAltura = 100;
 
-    for (let i=0; i<data.length; i++) {
-      if (data[i].vento > maxVento) {
-        maxVento = data[i].vento;
-      }
-      if (data[i].altura > maxAltura) {
-        maxAltura = data[i].altura;
-      }
-      if (data[i].altura < minAltura) {
-        minAltura = data[i].altura;
-      }
-    }
+    const { vento, altura } = apiData.cidade.previsao.reduce(
+      (acc, { vento, altura, agitacao }) => {
+        acc.vento.push(vento);
+        acc.altura.push(altura);
+        acc.agitacao.push(agitacao);
+        return acc;
+      },
+      { vento: [], altura: [], agitacao: [] }
+    );
 
-    for (let i=0; i<data.length; i++) {
-      data[i].vento = map(data[i].vento, 0, maxVento, 0, 1);
-      data[i].altura = map(data[i].altura, minAltura, maxAltura, 0, 1);
-      if (data[i].agitacao == "Fraco") {
-        data[i].agitacao = 0;
-      } else if (data[i].agitacao == "Moderado") {      
-        data[i].agitacao = 0.5;
-      } else if (data[i].agitacao == "Forte") {
-        data[i].agitacao = 1;
-      }
-    }
-    
+    const maxVento = Math.max(...vento);
+    const maxAltura = Math.max(...altura);
+    const minAltura = Math.min(...altura);
+
+    data = apiData.cidade.previsao.map((item) => ({
+      ...item,
+      vento: map(item.vento, 0, maxVento, 0, 1),
+      altura: map(item.altura, minAltura, maxAltura, 0, 1),
+      agitacao: item.agitacao === "Fraco" ? 0 : item.agitacao === "Moderado" ? 0.5 : 1,
+    }));
+
     if (DEBUG)
       console.log(data);
   });
