@@ -127,8 +127,22 @@ let min;
 let data;
 let index;
 
+/*
+* `outputStride`: Specifies the output stride of the BodyPix model.
+* The smaller the value, the larger the output resolution, and more accurate
+* the model at the cost of speed. Set this to a larger value to increase speed
+* at the cost of accuracy. Stride 32 is supported for ResNet and
+* stride 8,16,32 are supported for various MobileNetV1 models.
+
+* `segmentationThreshold`: The minimum that segmentation values must
+ * have to be considered part of the person. Affects the generation of the
+ * segmentation mask. More specifically, it is the threshold used to binarize
+ * the intermediate person segmentation probability. The probability of each
+ * pixel belongs to a person is in range [0, 1]. If the probability is greater
+ * than the `segmentationThreshold`, it will be set to 1 otherwise 0.
+*/
 const options = {
-  outputStride: 8, // 8, 16, or 32, default is 16
+  outputStride: 32, // 8, 16, or 32, default is 16
   segmentationThreshold: 0.5, // 0 - 1, defaults to 0.5
 };
 
