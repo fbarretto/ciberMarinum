@@ -17,7 +17,8 @@ socket.addEventListener('message', function (event) {
 
   // atualiza variáveis
   for (let i = 0; i < data.length; i++) {
-   sensor[i] = parseFloat(data[i]);
+    //ease in
+   sensor[i] += (parseFloat(data[i]) - sensor[i])*0.1;
   }
 });
 
