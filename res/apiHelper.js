@@ -182,12 +182,22 @@ function parseXml(xml) {
  * @param {string} apiURL - The URL of the API to fetch data from.
  * @returns {Promise<Object>} - A promise that resolves to the fetched JSON data.
  */
- async function getData(apiURL) {
-   const response = await fetch(apiURL);
-   data = await response.text();
-   const dom = parseXml(data);
-   const myJsonStr = xml2json(dom);
-   const fixedJsonStr = myJsonStr.replace(/\nundefined/, "");
-   const jsonObj = JSON.parse(fixedJsonStr);
-   return jsonObj;
- }
+async function getData(apiURL) {
+   try {
+      const response = await fetch(apiURL);
+      if (response.ok) {
+         const data = await response.text();
+         const dom = parseXml(data);
+         const myJsonStr = xml2json(dom);
+         const fixedJsonStr = myJsonStr.replace(/\nundefined/, "");
+         const jsonObj = JSON.parse(fixedJsonStr);
+         return jsonObj;
+      } else {
+         console.log('Something went wrong');
+         return null;
+      }
+   } catch (error) {
+      console.log(error);
+      return null;
+   }
+}
