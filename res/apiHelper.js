@@ -12,12 +12,12 @@ function parseXml(xml) {
           dom.async = false;
           if (!dom.loadXML(xml)) // parse error ..
  
-             window.alert(dom.parseError.reason + dom.parseError.srcText);
+             console.log(dom.parseError.reason + dom.parseError.srcText);
        } 
        catch (e) { dom = null; }
     }
     else
-       alert("cannot parse xml string!");
+       console.log("cannot parse xml string!");
     return dom;
  }
  
@@ -88,7 +88,7 @@ function parseXml(xml) {
              o = X.toObj(xml.documentElement);
           }
           else
-             alert("unhandled node type: " + xml.nodeType);
+             console.log("unhandled node type: " + xml.nodeType);
           return o;
        },
        toJson: function(o, name, ind) {
