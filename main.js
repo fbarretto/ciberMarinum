@@ -35,7 +35,7 @@
 
 'use strict';
 
-const DEBUG = false;
+const DEBUG = true;
 const API_URL = "http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml";
 
 // framebuffer
@@ -236,6 +236,7 @@ function draw(){
     updateTime();
     if (DEBUG)
       console.log(frameRate());
+      console.log(rdDef);
   }
 }
 
@@ -433,7 +434,6 @@ function gotResults(error, result) {
 function updateParams() {
   updateSensorParams();
   updateAPIparams();
-  if (DEBUG) console.log(rdDef);
 }
 
 /**
