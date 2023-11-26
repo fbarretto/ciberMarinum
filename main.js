@@ -90,15 +90,15 @@ let rdDef = {
 };
 
 let minFeed = 0.012;
-let maxFeed = 0.025;
+let maxFeed = 0.02;
 let minKill = 0.045;
 let maxKill = 0.055;
-let minDb = 0.4;
-let maxDb = 0.6;
+let minDb = 0.5;
+let maxDb = 0.7;
 let minIter = 8;
 let maxIter = 15;
 let minDt = 0.9;
-let maxDt = 1.2;
+let maxDt = 1;
 
 
 // shading colors
@@ -116,9 +116,12 @@ let sensors = [0.5, 0.5];
 
 let HSBcolors = Array(pallette.length/3).fill(0);
 
-let bodypix;
+// let bodypix;
 let video;
-let segmentation;
+// let segmentation;
+
+let poseNet;
+let poses = [];
 
 
 let day;
@@ -147,7 +150,7 @@ const options = {
 };
 
 function preload() {
-  bodypix = ml5.bodyPix(options);
+  // bodypix = ml5.bodyPix(options);
   loadData();
   printManual();
 }
@@ -160,8 +163,20 @@ function setup() {
   createCanvas(windowWidth, windowHeight, WEBGL);
   frameRate(30);
 
-  video = createCapture(VIDEO, videoReady);
+  // video = createCapture(VIDEO, videoReady);
+  // video.size(width, height);
+  // video.hide();
+  video = createCapture(VIDEO);
   video.size(width, height);
+
+  // Create a new poseNet method with a single detection
+  poseNet = ml5.poseNet(video);
+  // This sets up an event that fills the global variable "poses"
+  // with an array every time new poses are detected
+  poseNet.on('pose', function(results) {
+    poses = results;
+  });
+  // Hide the video element, and just show the canvas
   video.hide();
    
   // webgl context
@@ -222,6 +237,7 @@ function setup() {
   initRD();
   index = 0;
   initTime();
+
 }
 
 function draw(){
@@ -292,7 +308,7 @@ function updatePallette() {
 }
 
 function videoReady() {
-  bodypix.segment(video, gotResults);
+  // bodypix.segment(video, gotResults);
 }
 
 function windowResized() {
@@ -419,20 +435,57 @@ function updateRD(){
     shader_grayscott.quad();
     shader_grayscott.end();
     
-    if (segmentation) {
+    // if (segmentation) {
       ellipse(0,0,1,1);
-      tint(0,255,0);
-      push();
-      translate(width,0); // move to far corner
-      scale(-1.0,1.0); // flip x-axis backwards
-      image(segmentation.backgroundMask, 0, 0, width, height);
-      pop();
-    }
+      // tint(0,255,0);
+      // push();
+      // translate(width,0); // move to far corner
+      // scale(-1.0,1.0); // flip x-axis backwards
+      // image(segmentation.backgroundMask, 0, 0, width, height);
+      // pop();
+      drawKeypoints();
+      drawSkeleton();
+    // }
     
     tex.swap();
   }
   
   fbo.end();
+}
+
+// A function to draw ellipses over the detected keypoints
+function drawKeypoints()  {
+  // Loop through all the poses detected
+  for (let i = 0; i < poses.length; i++) {
+    // For each pose detected, loop through all the keypoints
+    let pose = poses[i].pose;
+    for (let j = 0; j < pose.keypoints.length; j++) {
+      // A keypoint is an object describing a body part (like rightArm or leftShoulder)
+      let keypoint = pose.keypoints[j];
+      // Only draw an ellipse is the pose probability is bigger than 0.2
+      if (keypoint.score > 0.2) {
+        fill(0, 255, 0,120);
+        noStroke();
+        ellipse(keypoint.position.x, keypoint.position.y, width*0.05, width*0.05);
+      }
+    }
+  }
+}
+
+// A function to draw the skeletons
+function drawSkeleton() {
+  // Loop through all the skeletons detected
+  for (let i = 0; i < poses.length; i++) {
+    let skeleton = poses[i].skeleton;
+    // For every skeleton, loop through all body connections
+    for (let j = 0; j < skeleton.length; j++) {
+      let partA = skeleton[j][0];
+      let partB = skeleton[j][1];
+      stroke(0, 255, 0,120);
+      strokeWeight(width*0.1);
+      line(partA.position.x, partA.position.y, partB.position.x, partB.position.y);
+    }
+  }
 }
 
 function gotResults(error, result) {
