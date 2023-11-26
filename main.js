@@ -175,6 +175,8 @@ function setup() {
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
     poses = results;
+    if(DEBUG)
+      console.log(poses);
   });
   // Hide the video element, and just show the canvas
   video.hide();
@@ -454,7 +456,7 @@ function updateRD(){
 }
 
 // A function to draw ellipses over the detected keypoints
-function drawKeypoints()  {
+function drawKeypoints() {
   // Loop through all the poses detected
   for (let i = 0; i < poses.length; i++) {
     // For each pose detected, loop through all the keypoints
