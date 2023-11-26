@@ -35,32 +35,31 @@
 
 'use strict';
 
-let DEBUG = true;
+const DEBUG = true;
 const API_URL = "http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml";
 
-
 // framebuffer
-var fbo;
+let fbo;
 
 // tex-struct (ping-pong)
-var tex = 
+let tex = 
 {
   src : null,
   dst : null,
   swap : function(){
-    var tmp = this.src;
+    let tmp = this.src;
     this.src = this.dst;
     this.dst = tmp;
   }
 };
 
 // shader
-var shaderfiles = {};
-var shader_grayscott;
-var shader_display;
+let shaderfiles = {};
+let shader_grayscott;
+let shader_display;
 
 // offscreen resolution scale factor.
-var SCREEN_SCALE = 1.0; 
+let SCREEN_SCALE = 0.5; 
 
 
 //feed range = 0.012 - 0.25
@@ -149,7 +148,7 @@ const options = {
 
 function preload() {
   bodypix = ml5.bodyPix(options);
-  // loadData();
+  loadData();
   printManual();
 }
 
@@ -165,23 +164,23 @@ function setup() {
   video.size(width, height);
   video.hide();
    
-  noCursor();
-  
   // webgl context
-  var gl = this._renderer.GL;
+  let gl = this._renderer.GL;
   
   // webgl version (1=webgl1, 2=webgl2)
-  var VERSION = gl.getVersion();
+  let VERSION = gl.getVersion();
   
-  console.log("WebGL Version: "+VERSION);
+  noCursor();
+  if (DEBUG) {
+    console.log("WebGL Version: "+VERSION);
+  }
   
-
   // get some webgl extensions
   // if(VERSION === 1){
-    // var ext = gl.newExt(['OES_texture_float', 'OES_texture_float_linear'], true);
+    // let ext = gl.newExt(['OES_texture_float', 'OES_texture_float_linear'], true);
   // }
   // if(VERSION === 2){
-    // var ext = gl.newExt(['EXT_color_buffer_float'], true);
+    // let ext = gl.newExt(['EXT_color_buffer_float'], true);
   // }
   
   // beeing lazy ... load all available extensions.
@@ -192,7 +191,7 @@ function setup() {
   fbo = gl.newFramebuffer();
 
   // create Textures for multipass rendering
-  var def = {
+  let def = {
      target   : gl.TEXTURE_2D
     ,iformat  : gl.RGBA32F
     ,format   : gl.RGBA
@@ -201,26 +200,22 @@ function setup() {
     ,filter   : [gl.NEAREST, gl.LINEAR]
   }
 
+  let tex_w = ceil(width * SCREEN_SCALE);
+  let tex_h = ceil(height * SCREEN_SCALE);
   
-  var tex_w = ceil(width * SCREEN_SCALE);
-  var tex_h = ceil(height * SCREEN_SCALE);
-
   tex.src = gl.newTexture(tex_w, tex_h, def);
   tex.dst = gl.newTexture(tex_w, tex_h, def);
-
-
   
   // Shader source, depending on available webgl version
-  var fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
-  var fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
-  
+  // let fs_grayscott = document.getElementById("webgl"+VERSION+".fs_grayscott").textContent;
+  // let fs_display   = document.getElementById("webgl"+VERSION+".fs_display"  ).textContent;
+	
+  let fs_grayscott = shaderfiles["webgl"+VERSION+".fs_grayscott"];
+  let fs_display   = shaderfiles["webgl"+VERSION+".fs_display"];
   // crreate Shader
   shader_grayscott = new Shader(gl, {fs:fs_grayscott});
   shader_display   = new Shader(gl, {fs:fs_display  });
-  
- 
-  // place initial samples
-  
+    
   // place initial samples
   initColors();
   updatePallette();
@@ -236,12 +231,12 @@ function draw(){
   ortho();
   translate(-width/2, -height/2, 0);
   updateRD();
+  updatePallette();
   pop();
 
-  var w = tex.dst.w / SCREEN_SCALE;
-  var h = tex.dst.h / SCREEN_SCALE;
+  let w = tex.dst.w / SCREEN_SCALE;
+  let h = tex.dst.h / SCREEN_SCALE;
   
-
   // display result
   shader_display.viewport(0, 0, w, h);
   shader_display.begin();
@@ -251,17 +246,12 @@ function draw(){
   shader_display.quad();
   shader_display.end();
   
-  // if(frameCount%60==0) {
-  //   updateTime();
-  //   if (DEBUG)
-  //     console.log(frameRate());
-  //     console.log(rdDef);
-  // }
-}
-
-function setupShaderFiles() {
-
-  
+  if(frameCount%60==0) {
+    updateTime();
+    if (DEBUG)
+      console.log(frameRate());
+      console.log(rdDef);
+  }
 }
 
 
@@ -368,13 +358,13 @@ function initRD(){
   ortho();
   // translate(-width/2, -height/2, 0);
     
-  var gl = fbo.gl;
+  let gl = fbo.gl;
   
   // bind framebuffer and texture for offscreenrendering
   fbo.begin(tex.dst);
   
-  var w = tex.dst.w;
-  var h = tex.dst.h;
+  let w = tex.dst.w;
+  let h = tex.dst.h;
   
   gl.viewport(0, 0, w, h);
   gl.clearColor(1.0, 0.0, 0.0, 0.0);
@@ -382,7 +372,8 @@ function initRD(){
   gl.disable(gl.BLEND);
   gl.disable(gl.DEPTH_TEST);
   
-  // < native p5 here
+  //initial RD 
+  
   stroke(0,255,0);
   strokeWeight(10);
   noFill();
@@ -396,18 +387,18 @@ function initRD(){
 }
 
 function updateRD(){
-  // updateParams();
+  updateParams();
 
-  var gl = fbo.gl;
+  let gl = fbo.gl;
 
   // multipass rendering (ping-pong)
-  for(var i = 0; i < rdDef.iter; i++){
+  for(let i = 0; i < rdDef.iter; i++){
     
     // set texture as rendertarget
     fbo.begin(tex.dst);
     
-    var w = tex.dst.w;
-    var h = tex.dst.h;
+    let w = tex.dst.w;
+    let h = tex.dst.h;
  
     // clear texture
     gl.viewport(0, 0, w, h);
@@ -430,21 +421,19 @@ function updateRD(){
     
     if (segmentation) {
       ellipse(0,0,1,1);
-      push();
       tint(0,255,0);
+      push();
       translate(width,0); // move to far corner
       scale(-1.0,1.0); // flip x-axis backwards
       image(segmentation.backgroundMask, 0, 0, width, height);
       pop();
     }
     
-      // ping-pong
-      tex.swap();
-    }
-    
-    // end fbo, so p5 can take over again.
-    fbo.end();
+    tex.swap();
   }
+  
+  fbo.end();
+}
 
 function gotResults(error, result) {
   if (error) {
