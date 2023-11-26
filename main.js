@@ -35,7 +35,7 @@
 
 'use strict';
 
-const DEBUG = true;
+let DEBUG = true;
 const API_URL = "http://servicos.cptec.inpe.br/XML/cidade/241/todos/tempos/ondas.xml";
 
 // framebuffer
@@ -175,8 +175,6 @@ function setup() {
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
     poses = results;
-    if(DEBUG)
-      console.log(poses);
   });
   // Hide the video element, and just show the canvas
   video.hide();
@@ -269,6 +267,7 @@ function draw(){
     if (DEBUG)
       console.log(frameRate());
       console.log(rdDef);
+      console.log("Detected poses: " + poses.length);
   }
 }
 
