@@ -144,10 +144,26 @@ let index;
  * pixel belongs to a person is in range [0, 1]. If the probability is greater
  * than the `segmentationThreshold`, it will be set to 1 otherwise 0.
 */
+// const options = {
+//   outputStride: 32, // 8, 16, or 32, default is 16
+//   segmentationThreshold: 0.5, // 0 - 1, defaults to 0.5
+// };
+
 const options = {
-  outputStride: 32, // 8, 16, or 32, default is 16
-  segmentationThreshold: 0.5, // 0 - 1, defaults to 0.5
+  architecture: 'MobileNetV1',
+  // imageScaleFactor: 0.3,
+  // outputStride: 16,
+  flipHorizontal: true,
+  // minConfidence: 0.5,
+  // maxPoseDetections: 5,
+  // scoreThreshold: 0.5,
+  // nmsRadius: 20,
+  detectionType: 'multiple',
+  // inputResolution: 513,
+  // multiplier: 0.75,
+  // quantBytes: 2,
 };
+
 
 function preload() {
   // bodypix = ml5.bodyPix(options);
@@ -170,7 +186,7 @@ function setup() {
   video.size(width, height);
 
   // Create a new poseNet method with a single detection
-  poseNet = ml5.poseNet(video);
+  poseNet = ml5.poseNet(video, options);
   // This sets up an event that fills the global variable "poses"
   // with an array every time new poses are detected
   poseNet.on('pose', function(results) {
