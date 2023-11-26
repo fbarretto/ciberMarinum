@@ -1,53 +1,5 @@
 ////////////////////////////////////////////////////////////////////////////////
 //
-// p5.js ... patches/fixes/extensions
-//
-////////////////////////////////////////////////////////////////////////////////
-
-
-// due to a current bug it seems antialiasing cant be set to graphics 
-// via the official api.
-// also, this allows to create a webgl2 context
-
-var attributes = {
-  alpha: true, // canvas contains an alpha buffer.
-  depth: true, // drawing buffer has a depth buffer of at least 16 bits.
-  stencil: true, // drawing buffer has a stencil buffer of at least 8 bits.
-  antialias: true, //  whether or not to perform anti-aliasing.
-  // premultipliedAlpha: false, // drawing buffer contains colors with pre-multiplied alpha.
-  preserveDrawingBuffer: true, // buffers will not be cleared
-  failIfMajorPerformanceCaveat: true
-};
-
-
-p5.RendererGL.prototype._initContext = function() {
-  
-  this.attributes = attributes; // use custom attributes
-
-  try {
-    this.drawingContext = false
-                       || this.canvas.getContext('webgl2', this.attributes)
-                       || this.canvas.getContext('webgl', this.attributes)
-                       || this.canvas.getContext('experimental-webgl', this.attributes)
-                        ;
-    if (this.drawingContext) {
-      var gl = this.drawingContext;
-      gl.enable(gl.DEPTH_TEST);
-      gl.depthFunc(gl.LEQUAL);
-      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-      this._viewport = gl.getParameter(gl.VIEWPORT);
-    } else {
-      throw new Error('Error creating webgl context');
-    }
-  } catch (er) {
-    throw new Error(er);
-  }
-};
-
-
-
-////////////////////////////////////////////////////////////////////////////////
-//
 //
 // p5 bugfixes
 //
@@ -235,4 +187,53 @@ p5.RendererGL.prototype._edgesToVertices = function(geom) {
     geom.lineVertices.push(vA, vA, vB, vB, vA, vB);
   }
   
+};
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//
+// p5.js ... patches/fixes/extensions
+//
+////////////////////////////////////////////////////////////////////////////////
+
+
+// due to a current bug it seems antialiasing cant be set to graphics 
+// via the official api.
+// also, this allows to create a webgl2 context
+
+var attributes = {
+  alpha: true, // canvas contains an alpha buffer.
+  depth: true, // drawing buffer has a depth buffer of at least 16 bits.
+  stencil: true, // drawing buffer has a stencil buffer of at least 8 bits.
+  antialias: true, //  whether or not to perform anti-aliasing.
+  // premultipliedAlpha: false, // drawing buffer contains colors with pre-multiplied alpha.
+  preserveDrawingBuffer: true, // buffers will not be cleared
+  failIfMajorPerformanceCaveat: true
+};
+
+
+p5.RendererGL.prototype._initContext = function() {
+  
+  this.attributes = attributes; // use custom attributes
+
+  try {
+    this.drawingContext = false
+                       || this.canvas.getContext('webgl2', this.attributes)
+                       || this.canvas.getContext('webgl', this.attributes)
+                       || this.canvas.getContext('experimental-webgl', this.attributes)
+                        ;
+    if (this.drawingContext) {
+      var gl = this.drawingContext;
+      gl.enable(gl.DEPTH_TEST);
+      gl.depthFunc(gl.LEQUAL);
+      gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+      this._viewport = gl.getParameter(gl.VIEWPORT);
+    } else {
+      throw new Error('Error creating webgl context');
+    }
+  } catch (er) {
+    throw new Error(er);
+  }
 };
