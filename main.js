@@ -90,15 +90,15 @@ let rdDef = {
 };
 
 let minFeed = 0.012;
-let maxFeed = 0.025;
+let maxFeed = 0.02;
 let minKill = 0.045;
 let maxKill = 0.055;
-let minDb = 0.4;
-let maxDb = 0.6;
+let minDb = 0.5;
+let maxDb = 0.7;
 let minIter = 8;
 let maxIter = 15;
 let minDt = 0.9;
-let maxDt = 1.2;
+let maxDt = 1.0;
 
 
 // shading colors
