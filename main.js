@@ -148,7 +148,7 @@ const options = {
 
 function preload() {
   bodypix = ml5.bodyPix(options);
-  loadData();
+  // loadData();
   printManual();
 }
 
