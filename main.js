@@ -446,8 +446,8 @@ function gotResults(error, result) {
 
 
 function updateParams() {
-  updateSensorParams();
-  updateAPIparams();
+  // updateSensorParams();
+  // updateAPIparams();
 }
 
 /**
